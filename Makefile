@@ -352,28 +352,10 @@ load_irmin_data:
 
 
 load_check:
-	$(eval START_TIME = $(shell date +%s))
-	@./loadavg.sh $(OPT_WAIT) $(START_TIME)
+	@ scripts/loadavg.sh $(OPT_WAIT)
 
 filter/%:
-	$(eval CONFIG_SWITCH_NAME = $*)
-	$(eval CONFIG_VARIANT = $(shell echo $(CONFIG_SWITCH_NAME) | grep -oP '([0-9]|\.)*'  ))
-	@echo $(CONFIG_VARIANT)
-	@{ case $(CONFIG_VARIANT) in \
-		*5.1.0*) echo "Filtering some benchmarks for OCaml ${CONFIG_VARIANT}"; \
-			jq '{wrappers : .wrappers, benchmarks: [.benchmarks | .[] | select( .name as $$name | ["irmin_replay", "cpdf", "frama-c", "js_of_ocaml", "graph500_kernel1", "graph500_kernel1_multicore"] | index($$name) | not )]}' $(RUN_CONFIG_JSON) > $(RUN_CONFIG_JSON).tmp; \
-			mv $(RUN_CONFIG_JSON).tmp $(RUN_CONFIG_JSON); \
-			echo "(data_only_dirs irmin cpdf frama-c)" > benchmarks/dune;; \
-		*5.0.1*) echo "Filtering some benchmarks for OCaml ${CONFIG_VARIANT}"; \
-			jq '{wrappers : .wrappers, benchmarks: [.benchmarks | .[] | select( .name as $$name | ["irmin_replay", "cpdf", "frama-c", "js_of_ocaml", "graph500_kernel1", "graph500_kernel1_multicore"] | index($$name) | not )]}' $(RUN_CONFIG_JSON) > $(RUN_CONFIG_JSON).tmp; \
-			mv $(RUN_CONFIG_JSON).tmp $(RUN_CONFIG_JSON); \
-			echo "(data_only_dirs irmin cpdf frama-c)" > benchmarks/dune;; \
-		*4.14*) echo "Filtering some benchmarks for OCaml ${CONFIG_VARIANT}"; \
-			jq '{wrappers : .wrappers, benchmarks: [.benchmarks | .[] | select( .name as $$name | ["irmin_replay", "cpdf", "frama-c", "js_of_ocaml", "graph500_kernel1", "graph500_kernel1_multicore"] | index($$name) | not )]}' $(RUN_CONFIG_JSON) > $(RUN_CONFIG_JSON).tmp; \
-			mv $(RUN_CONFIG_JSON).tmp $(RUN_CONFIG_JSON); \
-			echo "(data_only_dirs irmin cpdf frama-c)" > benchmarks/dune;; \
-		*) echo "Not filtering benchmarks for OCaml ${CONFIG_VARIANT}";; \
-	esac };
+	@ scripts/filter.sh $* ${RUN_CONFIG_JSON}
 
 depend: check_url load_check
 	$(foreach d, $(DEPENDENCIES),      $(call check_dependency, $(d), dpkg -l,   Install on Ubuntu using apt.))
