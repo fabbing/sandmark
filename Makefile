@@ -234,7 +234,7 @@ log_sandmark_hash:
 blah:
 	@echo ${PACKAGES}
 
-ocaml-versions/%.bench: depend check-parallel/% filter/% override_packages/% log_sandmark_hash ocaml-versions/%.json .FORCE
+ocaml-versions/%.bench: depend/% check-parallel/% filter/% override_packages/% log_sandmark_hash ocaml-versions/%.json .FORCE
 	$(eval CONFIG_SWITCH_NAME = $*)
 	$(eval CONFIG_OPTIONS      = $(shell jq -r '.configure // empty' ocaml-versions/$*.json))
 	$(eval CONFIG_RUN_PARAMS   = $(shell jq -r '.runparams // empty' ocaml-versions/$*.json))
@@ -302,47 +302,11 @@ define check_dependency
 		@echo "$(1) is not installed. $(3)")
 endef
 
-check_jq:
-	@{ for f in `find ocaml-versions/*.json`; do		\
-		RESULT=`jq . $$f > /dev/null 2>&1; echo $$?`;	\
-		if [ "$${RESULT}" != 0 ]; then			\
-			echo "Error: jq parsing error in $$f";	\
-			exit 1;					\
-		fi;						\
-	    done;						\
-	};
+check_url:
+	@ scripts/check_json_url.sh
 
-check_url: check_jq
-	@{  if [ -z "$$(which wget)" ]; then							\
-		    echo "wget wasn't installed!";							\
-			exit 1;													\
-		fi;															\
-		for f in `find ocaml-versions/*.json`; do					\
-		HEAD=`head -1 $$f`;							\
-		if [ "$$HEAD" == "{" ]; then						\
-			URL=`jq -r '.url' $$f`;						\
-			if [ -z "$$URL" ] ; then					\
-				echo "No URL (mandatory) for $$f";			\
-				exit 1;												\
-			else								\
-				URL_EXISTS=`wget --spider $$URL 2>/dev/null; echo $$?`; \
-				if [ "$${URL_EXISTS}" != 0 ]; then			\
-					echo "Error: URL $$URL does not exist";		\
-					exit 1;											\
-				fi;							\
-			fi;								\
-		else									\
-			URLS=`jq -r .[].url $$f`;					\
-			for u in "$$URLS"; do						\
-				URL_EXISTS=`wget --spider $$u 2>/dev/null; echo $$?`;	\
-				if [ "$${URL_EXISTS}" != 0 ]; then			\
-					echo "Error: URL $$u does not exist";		\
-					exit 1;											\
-				fi;							\
-			done;								\
-		fi;									\
-	    done;									\
-	};
+check_json_url/%:
+	@ scripts/check_json_url.sh $*
 
 load_irmin_data:
 	mkdir -p /tmp/irmin_trace_replay_artefacts;
@@ -355,9 +319,9 @@ load_check:
 	@ scripts/loadavg.sh $(OPT_WAIT)
 
 filter/%:
-	@ scripts/filter.sh $* ${RUN_CONFIG_JSON}
+	@ scripts/filter.sh $* $(RUN_CONFIG_JSON)
 
-depend: check_url load_check
+depend/%: check_json_url/% load_check
 	$(foreach d, $(DEPENDENCIES),      $(call check_dependency, $(d), dpkg -l,   Install on Ubuntu using apt.))
 	$(foreach d, $(PIP_DEPENDENCIES),  $(call check_dependency, $(d), pip3 list --format=columns, Install using pip3 install.))
 
