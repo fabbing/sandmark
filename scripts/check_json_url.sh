@@ -14,8 +14,8 @@ check_valid_url () {
         echo "No URL (mandatory) for $1";
         exit 1;
     elif ! which wget >/dev/null; then
-        echo "Command wget wasn't installed!";
-        exit 1;
+        echo "Command 'wget' isn't installed, skipping url checking...";
+        exit 0;
     elif ! wget --spider "$2" 2>/dev/null; then
         echo "Error: URL $2 does not exist";
         exit 1;
