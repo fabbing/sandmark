@@ -230,9 +230,6 @@ endif
 log_sandmark_hash:
 	-git log -n 1
 
-.PHONY: blah
-blah:
-	@echo ${PACKAGES}
 
 ocaml-versions/%.bench: depend/% check-parallel/% filter/% override_packages/% log_sandmark_hash ocaml-versions/%.json .FORCE
 	$(eval CONFIG_SWITCH_NAME = $*)
