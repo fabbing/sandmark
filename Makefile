@@ -299,26 +299,18 @@ define check_dependency
 		@echo "$(1) is not installed. $(3)")
 endef
 
-check_url:
-	@ scripts/check_json_url.sh
-
-check_json_url/%:
-	@ scripts/check_json_url.sh $*
-
 load_irmin_data:
 	mkdir -p /tmp/irmin_trace_replay_artefacts;
 	if [ ! -f $(IRMIN_DATA_DIR)/data4_100066commits.repr ]; then \
 		wget http://data.tarides.com/irmin/data4_100066commits.repr -P $(IRMIN_DATA_DIR); \
 	fi;
 
-
-load_check:
-	@ scripts/loadavg.sh $(OPT_WAIT)
-
 filter/%:
 	@ scripts/filter.sh $* $(RUN_CONFIG_JSON)
 
-depend/%: check_json_url/% load_check
+depend/%:
+	@ scripts/check_json_url.sh $*
+	@ scripts/loadavg.sh $(OPT_WAIT)
 	$(foreach d, $(DEPENDENCIES),      $(call check_dependency, $(d), dpkg -l,   Install on Ubuntu using apt.))
 	$(foreach d, $(PIP_DEPENDENCIES),  $(call check_dependency, $(d), pip3 list --format=columns, Install using pip3 install.))
 
