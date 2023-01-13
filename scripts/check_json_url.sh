@@ -38,7 +38,7 @@ check_url_from_file () {
 
 if [ -z "$CONFIG_SWITCH_NAME" ]; then
     # Checking all files in ocaml-versions
-    for f in $(find ocaml-versions/*.json); do
+    for f in ocaml-versions/*.json; do
         check_valid_json "$f";
         check_url_from_file "$f";
     done
