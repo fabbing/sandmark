@@ -61,9 +61,6 @@ CONTINUE_ON_OPAM_INSTALL_ERROR ?= true
 # before the benchmarks are executed
 OPT_WAIT ?= 1
 
-# The time when the wait for the loadavg to decrease begins
-START_TIME ?=
-
 IRMIN_DATA_DIR=/tmp/irmin-data
 
 WRAPPER = $(patsubst run_%,%,$(RUN_BENCH_TARGET))
@@ -329,18 +326,18 @@ list:
 	@echo $(ocamls)
 
 list_tags:
-	@echo "List of Tags"
-	@jq '[.benchmarks[].tags] | add | flatten | .[]' *.json | sort -u
+	@ echo "List of Tags"
+	@ jq '[.benchmarks[].tags] | add | flatten | .[]' *.json | sort -u
 
 bash:
-	bash
-	@echo "[opam subshell completed]"
+	@ bash
+	@ echo "[opam subshell completed]"
 
 %_filtered.json: %.json
-	jq '{wrappers : .wrappers, benchmarks: [.benchmarks | .[] | select(.tags | index($(TAG)) != null)]}' < $< > $@
+	@ jq '{wrappers : .wrappers, benchmarks: [.benchmarks | .[] | select(.tags | index($(TAG)) != null)]}' < $< > $@
 
 set-bench-cpu/%:
-	sed -i "s/cpu-list 5/cpu-list ${BENCH_CPU}/g" $*
+	@ sed -i "s/cpu-list 5/cpu-list ${BENCH_CPU}/g" $*
 
 %_2domains.json: %.json
-	jq '{wrappers : .wrappers, benchmarks : [.benchmarks | .[] | {executable : .executable, name: .name, tags: .tags, runs : [.runs | .[] as $$item | if ($$item | .params | split(" ") | .[0] ) == "2" then $$item | .paramwrapper |= "" else empty end ] } ] }' < $< > $@
+	@ jq '{wrappers : .wrappers, benchmarks : [.benchmarks | .[] | {executable : .executable, name: .name, tags: .tags, runs : [.runs | .[] as $$item | if ($$item | .params | split(" ") | .[0] ) == "2" then $$item | .paramwrapper |= "" else empty end ] } ] }' < $< > $@
