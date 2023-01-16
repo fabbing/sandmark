@@ -116,36 +116,7 @@ _opam/opam-init/init.sh:
 	opam init --bare --no-setup --no-opamrc --disable-sandboxing ./dependencies
 
 _opam/%: _opam/opam-init/init.sh ocaml-versions/%.json
-	$(eval CONFIG_SWITCH_NAME = $*)
-	rm -rf dependencies/packages/ocaml/ocaml.$*
-	rm -rf dependencies/packages/ocaml-base-compiler/ocaml-base-compiler.$*
-	mkdir -p dependencies/packages/ocaml/ocaml.$*
-	cp -R dependencies/template/ocaml/* dependencies/packages/ocaml/ocaml.$*/
-	mkdir -p dependencies/packages/ocaml-base-compiler/ocaml-base-compiler.$*
-	cp -R dependencies/template/ocaml-base-compiler/* \
-	  dependencies/packages/ocaml-base-compiler/ocaml-base-compiler.$*/
-	{	if [ "$(SANDMARK_URL)" == "" ]; then	\
-			url="$$(jq -r '.url // empty' ocaml-versions/$*.json)"; \
-		else \
-			url="$(SANDMARK_URL)"; \
-		fi; \
-		echo "url { src: \"$$url\" }"; echo "setenv: [ [ ORUN_CONFIG_ocaml_url = \"$$url\" ] ]"; } \
-	>> dependencies/packages/ocaml-base-compiler/ocaml-base-compiler.$*/opam;
-	$(eval OCAML_CONFIG_OPTION = $(shell jq -r '.configure // empty' ocaml-versions/$*.json))
-	$(eval OCAML_RUN_PARAM     = $(shell jq -r '.runparams // empty' ocaml-versions/$*.json))
-	opam update
-	OCAMLRUNPARAM="$(OCAML_RUN_PARAM)" OCAMLCONFIGOPTION="$(OCAML_CONFIG_OPTION)" opam switch create --keep-build-dir --yes $* ocaml-base-compiler.$*
-	@{ case "$*" in \
-		*5.1*) opam pin add -n --yes --switch $* sexplib0.v0.15.0 https://github.com/shakthimaan/sexplib0.git#multicore; \
-	esac };
-	# TODO remove pin when a new orun version is released on opam
-	opam pin add -n --yes --switch $* orun https://github.com/ocaml-bench/orun.git
-	# TODO remove pin when a new runtime_events_tools is released on opam
-	opam pin add -n --yes --switch $* runtime_events_tools https://github.com/sadiqj/runtime_events_tools.git#09630b67b82f7d3226736793dd7bfc33999f4b25
-	opam pin add -n --yes --switch $* ocamlfind https://github.com/dra27/ocamlfind/archive/lib-layout.tar.gz
-	opam pin add -n --yes --switch $* base.v0.14.3 https://github.com/janestreet/base.git#v0.14.3
-	opam pin add -n --yes --switch $* coq-core https://github.com/ejgallego/coq/archive/refs/tags/multicore-2021-09-29.tar.gz
-	opam pin add -n --yes --switch $* coq-stdlib https://github.com/ejgallego/coq/archive/refs/tags/multicore-2021-09-29.tar.gz
+	@ scripts/setup_opam.sh $* ${SANDMARK_URL}
 
 override_packages/%: setup_sys_dune/%
 	$(eval CONFIG_SWITCH_NAME = $*)
