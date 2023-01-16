@@ -270,25 +270,12 @@ ocaml-versions/%.bench: depend/% check-parallel/% filter/% override_packages/% l
 		exit 0;															\
 	   fi };
 
-json:
-	@{	output=data.json; \
-		tmp=test.json; \
-		count=0; \
-		while read line; do \
-			if [ "$${count}" -eq 0 ]; then \
-				echo "$${line}" | jq '. | {config: ., results: []}' > "$${output}"; \
-				count=1; \
-			else \
-				bench=`echo "$${line}" | jq '. | {name: .name, command: .command, context: {"ocaml.version": .ocaml.version, "ocaml.c_compiler": .ocaml.c_compiler, "ocaml.architecture": .ocaml.architecture, "ocaml.word_size": .ocaml.word_size, "ocaml.system": .ocaml.system, "ocaml.stats": .ocaml.stats, "ocaml.function_sections": .ocaml.function_sections, "ocaml.supports_shared_libraries": .ocaml.supports_shared_libraries, ocaml_url: .ocaml_url}, metrics: {time_secs: .time_secs, maxrss_kB: .maxrss_kB, user_time_secs: .user_time_secs, sys_time_secs: .sys_time_secs, "gc.allocated_words": .gc.allocated_words, "gc.minor_words": .gc.minor_words, "gc.promoted_words": .gc.promoted_words, "gc.major_words": .gc.major_words, "gc.minor_collections": .gc.minor_collections, "gc.major_collections": .gc.major_collections, "gc.heap_words": .gc.heap_words, "gc.top_heap_words": .gc.top_heap_words, "gc.mean_space_overhead": .gc.mean_space_overhead, codesize: .codesize}}'`; \
-				string=".results += [$${bench}]"; \
-				jq "$${string}" "$${output}" > "$${tmp}" && mv "$${tmp}" "$${output}"; \
-			fi; \
-		done < _results/*.bench; \
-	};
+data.json:
+	@ scripts/bench_to_json.sh
 
 prep_bench:
 	@{	$(BENCH_COMMAND); \
-		$(MAKE) json; \
+		$(MAKE) data.json; \
 	};
 
 bench: prep_bench

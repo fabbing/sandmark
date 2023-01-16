@@ -48,7 +48,7 @@ jobs:
           OPT_WAIT=0 USE_SYS_DUNE_HACK=1 RUN_CONFIG_JSON=run_config_filtered.json make ocaml-versions/5.1.0+stable.bench
           ls _results
           cat _results/*
-          make json
+          make data.json
 
       - name: 5.1.0+stable+parallel
         run: |
@@ -64,7 +64,7 @@ jobs:
           OPT_WAIT=0 USE_SYS_DUNE_HACK=1 BUILD_BENCH_TARGET=multibench_parallel RUN_CONFIG_JSON=multicore_parallel_run_config_filtered_filtered_2domains.json make ocaml-versions/5.1.0+stable.bench
           ls _results
           cat _results/*
-          make json
+          make data.json
 
       - name: 5.1.0+trunk+serial
         run: |
@@ -78,7 +78,7 @@ jobs:
           OPT_WAIT=0 USE_SYS_DUNE_HACK=1 RUN_CONFIG_JSON=run_config_filtered.json make ocaml-versions/5.1.0+trunk.bench
           ls _results
           cat _results/*
-          make json
+          make data.json
 
       - name: 5.1.0+trunk+parallel
         run: |
@@ -95,7 +95,7 @@ jobs:
           OPT_WAIT=0 USE_SYS_DUNE_HACK=1 BUILD_BENCH_TARGET=multibench_parallel RUN_CONFIG_JSON=multicore_parallel_run_config_filtered_filtered_2domains.json make ocaml-versions/5.1.0+trunk.bench
           ls _results
           cat _results/*
-          make json
+          make data.json
 
   build-5-0:
     strategy:
