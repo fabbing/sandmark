@@ -299,11 +299,7 @@ depend/%:
 	$(foreach d, $(PIP_DEPENDENCIES),  $(call check_dependency, $(d), pip3 list --format=columns, Install using pip3 install.))
 
 check-parallel/%:
-	$(eval CONFIG_SWITCH_NAME = $*)
-	@{ if [[ $(BUILD_BENCH_TARGET) =~ multibench* && $(CONFIG_SWITCH_NAME) =~ 4.14* ]]; then \
-		echo "Not running parallel tests for ${CONFIG_SWITCH_NAME}"; \
-		exit 1; \
-	fi };
+	@ scripts/check_parallel.sh $*
 
 benchclean:
 	rm -rf _build/
