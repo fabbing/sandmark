@@ -299,7 +299,7 @@ depend/%:
 	$(foreach d, $(PIP_DEPENDENCIES),  $(call check_dependency, $(d), pip3 list --format=columns, Install using pip3 install.))
 
 check-parallel/%:
-	@ scripts/check_parallel.sh $*
+	@ scripts/check_parallel.sh $* $(BUILD_BENCH_TARGET)
 
 benchclean:
 	rm -rf _build/
