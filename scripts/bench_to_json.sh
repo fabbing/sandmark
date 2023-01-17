@@ -1,8 +1,8 @@
 #!/bin/bash
+# Script called after we run the benchmarks.
+# Find a file in _results/ and output it in data.json
 
 output=data.json;
-
-# Find a file in _results/ and output it in data.json
 files=$(find _results/*.bench 2>/dev/null)
 nb_files=$(echo "$files" | wc -l)
 

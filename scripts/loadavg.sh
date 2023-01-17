@@ -1,4 +1,6 @@
 #!/bin/bash
+# Script called before we run the benchmarks.
+# Ensure the machine we run on isn't under heavy load.
 
 OPT_WAIT=$1
 START_TIME=$(date +%s)

@@ -113,7 +113,7 @@ endif
 ocamls=$(wildcard ocaml-versions/*.json)
 
 _opam/opam-init/init.sh:
-	opam init --bare --no-setup --no-opamrc --disable-sandboxing ./dependencies
+	@ opam init --bare --no-setup --no-opamrc --disable-sandboxing ./dependencies
 
 _opam/%: _opam/opam-init/init.sh ocaml-versions/%.json
 	@ scripts/setup_opam.sh $* ${SANDMARK_URL}

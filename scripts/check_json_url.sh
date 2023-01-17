@@ -1,6 +1,9 @@
 #!/bin/bash
+# Script called before we run the benchmarks.
+# Check that ocaml-versions/config_switch_name.json contains valid json,
+#   and that these json contains valid URLs.
 
-CONFIG_SWITCH_NAME=$1
+config_switch_name=$1
 
 check_valid_json () {
     if ! jq . "$1" >/dev/null 2>&1; then
@@ -36,14 +39,14 @@ check_url_from_file () {
     fi
 }
 
-if [ -z "$CONFIG_SWITCH_NAME" ]; then
+if [ -z "$config_switch_name" ]; then
     # Checking all files in ocaml-versions
     for f in ocaml-versions/*.json; do
         check_valid_json "$f";
         check_url_from_file "$f";
     done
 else
-    FILENAME=ocaml-versions/$CONFIG_SWITCH_NAME.json;
+    FILENAME=ocaml-versions/$config_switch_name.json;
     if [ -f "$FILENAME" ]; then
         check_valid_json "$FILENAME";
         check_url_from_file "$FILENAME";

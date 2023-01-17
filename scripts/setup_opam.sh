@@ -1,4 +1,6 @@
 #!/bin/bash
+# Script called before we run the benchmarks.
+# Create a local opam switch with all the specific dependencies and pins.
 
 config_switch_name=$1
 sandmark_url=$2
