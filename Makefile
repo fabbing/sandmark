@@ -45,7 +45,7 @@ USE_SYS_DUNE_HACK ?= 0
 RUN_BENCH_TARGET ?= run_orun
 
 # Dry run test without executing benchmarks
-BUILD_ONLY ?= 0
+BUILD_ONLY ?= false
 
 # number of benchmark iterations to run
 ITER ?= 1
@@ -59,7 +59,7 @@ CONTINUE_ON_OPAM_INSTALL_ERROR ?= true
 
 # option to wait for loadavg to settle down once the dependencies are installed and
 # before the benchmarks are executed
-OPT_WAIT ?= 1
+OPT_WAIT ?= true
 
 IRMIN_DATA_DIR=/tmp/irmin-data
 

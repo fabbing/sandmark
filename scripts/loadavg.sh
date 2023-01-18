@@ -2,18 +2,18 @@
 # Script called before we run the benchmarks.
 # Ensure the machine we run on isn't under heavy load.
 
-OPT_WAIT=$1
-START_TIME=$(date +%s)
+wait_quiet=$1
+start_time=$(date +%s)
 
 loadavg () {
     awk '{print 100*$1}' /proc/loadavg 
 }
 
-if [ "$OPT_WAIT" = 1 ]; then 
+if $wait_quiet; then 
     wall "It's bench startup time, please clear the way!";
-    sleep 60
+    sleep 60;
     while [ "$(loadavg)" -gt 60 ]; do 
-        if [ "$(($(date +%s) - START_TIME > 3600 * 12))" ]; then 
+        if [ "$(($(date +%s) - start_time > 3600 * 12))" ]; then 
             echo "Could not start for the past 12 hours; aborting run" >&2;
             exit 10;
         fi;

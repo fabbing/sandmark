@@ -10,7 +10,7 @@ iter=$6
 run_bench_target=$7
 sandmark_custom_name=$8
 
-if [ "$build_only" -ne 0 ]; then
+if $build_only; then
     exit 0;
 fi;
 

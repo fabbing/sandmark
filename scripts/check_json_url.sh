@@ -26,14 +26,14 @@ check_valid_url () {
 }
 
 check_url_from_file () {
-    HEAD=$(head -1 "$1");
-    if [ "$HEAD" = "{" ]; then
-        URL=$(jq -r '.url' "$1");
-        check_valid_url "$1" "$URL";
+    head=$(head -1 "$1");
+    if [ "$head" = "{" ]; then
+        url=$(jq -r '.url' "$1");
+        check_valid_url "$1" "$url";
     else
         # json not starting with '{' means it's a list, we iterate over elements
-        URLS=$(jq -r .[].url "$1");
-        for u in $URLS; do
+        urls=$(jq -r .[].url "$1");
+        for u in $urls; do
             check_valid_url "$1" "$u";
         done;
     fi
@@ -46,12 +46,12 @@ if [ -z "$config_switch_name" ]; then
         check_url_from_file "$f";
     done
 else
-    FILENAME=ocaml-versions/$config_switch_name.json;
-    if [ -f "$FILENAME" ]; then
-        check_valid_json "$FILENAME";
-        check_url_from_file "$FILENAME";
+    filename=ocaml-versions/$config_switch_name.json;
+    if [ -f "$filename" ]; then
+        check_valid_json "$filename";
+        check_url_from_file "$filename";
     else
-        echo "File $FILENAME doesn't exist.";
+        echo "File $filename doesn't exist.";
         exit 1;
     fi
 fi
