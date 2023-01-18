@@ -2,14 +2,9 @@
 # Script called to build the benchmarks.
 
 config_switch_name=$1
-wrapper=$2
-run_config_json=$3
-iter=$4
-build_bench_target=$5
-
-CONFIG_OPTIONS=$(jq -r '.configure // empty' ocaml-versions/"$config_switch_name".json)
-CONFIG_RUN_PARAMS=$(jq -r '.runparams // empty' ocaml-versions/"$config_switch_name".json)
-ENVIRONMENT=$(jq -r '.wrappers[] | select(.name=="'"$wrapper"'") | .environment // empty' "$run_config_json")
+run_config_json=$2
+iter=$3
+build_bench_target=$4
 
 fill_dune_file () {
     echo '(lang dune 1.0)';

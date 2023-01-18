@@ -200,7 +200,7 @@ log_sandmark_hash:
 
 
 ocaml-versions/%.bench: depend/% check-parallel/% filter/% override_packages/% log_sandmark_hash ocaml-versions/%.json .FORCE
-	@ scripts/build.sh $* $(WRAPPER) $(RUN_CONFIG_JSON) $(ITER) $(BUILD_BENCH_TARGET)
+	@ scripts/build.sh $* $(RUN_CONFIG_JSON) $(ITER) $(BUILD_BENCH_TARGET)
 	@ scripts/run.sh $* $(BUILD_ONLY) $(WRAPPER) $(RUN_CONFIG_JSON) $(PRE_BENCH_EXEC) $(ITER) $(RUN_BENCH_TARGET) $(SANDMARK_CUSTOM_NAME)
 
 data.json:
