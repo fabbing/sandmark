@@ -45,36 +45,38 @@ done;
 
 declare -A override=( [ocaml-config]='"ocaml-config" {= "1"}');
 
+add_to_override () {
+    pkg_name=$(cut -d '.' -f 1 <<< "$1");
+    pkg_version=$(cut -d '.' -f 2- <<< "$1");
+    override["$pkg_name"]="\"$pkg_name\" {= \"$pkg_version\" }"
+}
+
 if [ -z "$sandmark_override_packages" ]; then
-    for pkg in $(jq '.package_overrides | .[]?' ocaml-versions/"$config_switch_name".json); do
-        package=$(echo "$pkg" | xargs | tr -d '[:space:]');
-        package_name=$(cut -d '.' -f 1 <<< "$package");
-        package_version=$(cut -d '.' -f 2- <<< "$package");
-        override["$package_name"]="\"$package_name\" {= \"$package_version\" }";
+    for pkg in $(jq -r '.package_overrides | .[]?' ocaml-versions/"$config_switch_name".json); do
+        add_to_override "$pkg"
     done;
 else
     for p in $sandmark_override_packages; do
-        package_name=$(cut -d '.' -f 1 <<< "$p");
-        package_version=$(cut -d '.' -f 2- <<< "$p");
-        override["$package_name"]="\"$package_name\" {= \"$package_version\" }"; \
+        add_to_override "$p"
     done;
 fi;
 for key in "${!override[@]}"; do
     sed -i "/\"$key\"/s/.*/  ${override[$key]}/" "$dev_opam";
 done;
 
+remove_from_dev_opam () {
+    if [ -n "${override[$1]}" ]; then
+        sed -i "/\"$1\"/s/.*/ /" "$dev_opam";
+    fi
+}
+
 if [ -z "$sandmark_remove_packages" ]; then
-    for pkg in $(jq '.package_remove | .[]?' ocaml-versions/"$config_switch_name".json); do
-        name=$(echo "$pkg" | xargs | tr -d '[:space:]');
-        if [ -n "${override[$name]}" ]; then
-            sed -i "/\"$name\"/s/.*/ /" "$dev_opam";
-        fi;
+    for pkg in $(jq -r '.package_remove | .[]?' ocaml-versions/"$config_switch_name".json); do
+        remove_from_dev_opam "$pkg"
     done;
 else
-    for p in $sandmark_remove_packages; do
-        if [ -n "${override[$p]}" ]; then
-            sed -i "/\"$p\"/s/.*/ /" "$dev_opam";
-        fi;
+    for pkg in $sandmark_remove_packages; do
+        remove_from_dev_opam "$pkg"
     done;
 fi;
 sed -i '/^\s*$/d' "$dev_opam";
