@@ -68,7 +68,7 @@ WRAPPER = $(patsubst run_%,%,$(RUN_BENCH_TARGET))
 PACKAGES = sexplib0 re yojson react uuidm cpdf nbcodec minilight cubicle orun rungen
 
 ifeq ($(findstring multibench,$(BUILD_BENCH_TARGET)),multibench)
-	PACKAGES +=  lockfree kcas domainslib ctypes
+	PACKAGES += lockfree kcas domainslib ctypes
 else
 	PACKAGES += ctypes js_of_ocaml-compiler
 endif
@@ -119,77 +119,7 @@ _opam/%: _opam/opam-init/init.sh ocaml-versions/%.json
 	@ scripts/setup_opam.sh $* ${SANDMARK_URL}
 
 override_packages/%: setup_sys_dune/%
-	$(eval CONFIG_SWITCH_NAME = $*)
-	$(eval DEV_OPAM = $(OPAMROOT)/$(CONFIG_SWITCH_NAME)/share/dev.opam)
-	# Retrieve set of version constraints for chosen OCaml version
-	@{ case "$*" in \
-		*5.1.0*) echo "Using template/dev-5.1.0+trunk.opam" && cp dependencies/template/dev-5.1.0+trunk.opam $(DEV_OPAM) ;; \
-		*5.0.1*) echo "Using template/dev-5.0.1+trunk.opam" && cp dependencies/template/dev-5.0.0+trunk.opam $(DEV_OPAM) ;; \
-		*4.14*) echo "Using template/dev-4.14.0.opam" && cp dependencies/template/dev-4.14.0.opam $(DEV_OPAM) ;; \
-		*) echo "Using template/dev.opam" && cp dependencies/template/dev.opam $(DEV_OPAM) ;; \
-	esac };
-	# Conditionally install runtime_events_tools for olly (pausetimes)
-	@{ case "$*" in \
-		5.*) \
-			echo "Enabling pausetimes for OCaml >= 5"; \
-			$(eval PACKAGES += runtime_events_tools) ;; \
-	    *) echo "Pausetimes unavailable for OCaml < 5" ;; \
-	esac };
-	opam repo add alpha git+https://github.com/kit-ty-kate/opam-alpha-repository.git --on-switch=$(CONFIG_SWITCH_NAME) --rank 2
-	opam exec --switch $(CONFIG_SWITCH_NAME) -- opam update
-	opam install --switch=$(CONFIG_SWITCH_NAME) --yes "lru" "psq"
-	opam exec --switch $(CONFIG_SWITCH_NAME) -- opam list
-ifeq (0, $(USE_SYS_DUNE_HACK))
-	opam install --switch=$(CONFIG_SWITCH_NAME) --yes "dune.$(SANDMARK_DUNE_VERSION)" "dune-configurator.$(SANDMARK_DUNE_VERSION)" "dune-private-libs.$(SANDMARK_DUNE_VERSION)" || $(CONTINUE_ON_OPAM_INSTALL_ERROR)
-endif
-	opam update --switch=$(CONFIG_SWITCH_NAME)
-	@{	for i in ${PACKAGES}; do \
-			sed -i "/^]/i \ \ \"$${i}\"" $(DEV_OPAM); \
-		done; \
-	};
-	@{	declare -A OVERRIDE=( ["ocaml-config"]="\"ocaml-config\" {= \"1\"}" );	\
-		if [ -z "$(SANDMARK_OVERRIDE_PACKAGES)" ]; then \
-			do_overrides=`jq '.package_overrides' ocaml-versions/$*.json`; \
-			if [ "$${do_overrides}" != null ]; then \
-				for row in `cat ocaml-versions/$*.json | jq '.package_overrides | .[]'`; do	\
-					package=`echo $$row | xargs echo | tr -d '[:space:]'`; \
-					package_name=`cut -d '.' -f 1 <<< "$$package"`; \
-					package_version=`cut -d '.' -f 2- <<< "$$package"`; \
-					OVERRIDE["$${package_name}"]="\"$${package_name}\" {= \"$${package_version}\" }";	\
-				done;	\
-			fi; \
-		else \
-			for p in ${SANDMARK_OVERRIDE_PACKAGES}; do \
-				package="$${p}"; \
-				package_name=`cut -d '.' -f 1 <<< "$${package}"`; \
-				package_version=`cut -d '.' -f 2- <<< "$${package}"`; \
-				OVERRIDE["$${package_name}"]="\"$${package_name}\" {= \"$${package_version}\" }"; \
-			done; \
-		fi; \
-		for key in "$${!OVERRIDE[@]}"; do						\
-			sed -i "/\"$${key}\"/s/.*/  $${OVERRIDE[$${key}]}/" $(DEV_OPAM); \
-		done; \
-		if [ -z "$(SANDMARK_REMOVE_PACKAGES)" ]; then \
-			do_removal=`jq '.package_remove' ocaml-versions/$*.json`; \
-			if [ "$${do_removal}" != null ]; then \
-				for row in `cat ocaml-versions/$*.json | jq '.package_remove | .[]'`; do \
-					name=`echo $$row | xargs echo | tr -d '[:space:]'`; \
-					if [ OVERRIDE["$${name}"] != null ]; then \
-						sed -i "/\"$${name}\"/s/.*/ /" $(DEV_OPAM); \
-					fi; \
-				done; \
-			fi; \
-		else \
-			for p in ${SANDMARK_REMOVE_PACKAGES}; do \
-				if [ OVERRIDE["$${p}"] != null ]; then \
-					sed -i "/\"$${p}\"/s/.*/ /" $(DEV_OPAM); \
-				fi; \
-			done; \
-		fi; \
-		sed -i '/^\s*$$/d' $(DEV_OPAM); \
-		opam install $(DEV_OPAM) --switch=$(CONFIG_SWITCH_NAME) --yes --deps-only;	\
-		opam list --switch=$(CONFIG_SWITCH_NAME); \
-	};
+	@ scripts/override_packages.sh $* $(OPAMROOT) $(PACKAGES) $(USE_SYS_DUNE_HACK) $(SANDMARK_DUNE_VERSION) $(CONTINUE_ON_OPAM_INSTALL_ERROR) $(SANDMARK_OVERRIDE_PACKAGES) $(SANDMARK_REMOVE_PACKAGES)
 
 .PHONY: .FORCE
 .FORCE:
