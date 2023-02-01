@@ -119,7 +119,7 @@ _opam/%: _opam/opam-init/init.sh ocaml-versions/%.json
 	@ scripts/setup_opam.sh $* ${SANDMARK_URL}
 
 override_packages/%: setup_sys_dune/%
-	@ scripts/override_packages.sh $* $(OPAMROOT) $(PACKAGES) $(USE_SYS_DUNE_HACK) $(SANDMARK_DUNE_VERSION) $(CONTINUE_ON_OPAM_INSTALL_ERROR) $(SANDMARK_OVERRIDE_PACKAGES) $(SANDMARK_REMOVE_PACKAGES)
+	@ scripts/override_packages.sh $* $(OPAMROOT) "$(PACKAGES)" $(USE_SYS_DUNE_HACK) $(SANDMARK_DUNE_VERSION) $(CONTINUE_ON_OPAM_INSTALL_ERROR) "$(SANDMARK_OVERRIDE_PACKAGES)" "$(SANDMARK_REMOVE_PACKAGES)"
 
 .PHONY: .FORCE
 .FORCE:

@@ -36,7 +36,10 @@ opam exec --switch "$config_switch_name" -- opam update
 opam install --switch="$config_switch_name" --yes "lru" "psq"
 opam exec --switch "$config_switch_name" -- opam list
 if [ "$use_sys_dune_hack" -eq 0 ]; then
-    opam install --switch="$config_switch_name" --yes "dune.$sandmark_dune_version" "dune-configurator.$sandmark_dune_version" "dune-private-libs.$sandmark_dune_version" || $continue_on_opam_install_error
+    opam install --switch="$config_switch_name" --yes "dune.$sandmark_dune_version" "dune-configurator.$sandmark_dune_version" "dune-private-libs.$sandmark_dune_version"; ex=$?;
+    if [ $ex -ne 0 ] && [ ! "$continue_on_opam_install_error" ]; then
+        exit 1
+    fi
 fi;
 opam update --switch="$config_switch_name";
 for i in $packages; do
